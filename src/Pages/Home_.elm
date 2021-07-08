@@ -13,7 +13,7 @@ view =
             Element.column
                 [ Element.padding 40, Element.spacing 30 ]
                 [ Element.row []
-                    [ Element.text "Hello, world! from mdgriffith elm-ui" ]
+                    [ Element.text "Hello, world! from mdgriffith." ]
                 , Element.row [ semiBold ]
                     [ Element.link []
                         { url = "/calculator"
