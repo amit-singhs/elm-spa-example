@@ -323,11 +323,99 @@ update msg model =
 --VIEW
 
 
-view : Model -> View msg
 view model =
+    let
+        createButton buttonLabel buttonlength buttonEvent tL tR bL bR r g b =
+            Input.button
+                [ height (px 60)
+                , width (px buttonlength)
+                , Border.width 1
+                , Border.roundEach
+                    { topLeft = tL
+                    , topRight = tR
+                    , bottomLeft = bL
+                    , bottomRight = bR
+                    }
+                , Border.color <| Element.rgb255 84 83 81
+                , Font.size 25
+                , Font.family
+                    [ Font.typeface "Helvetica"
+                    ]
+                , Background.color <| Element.rgb255 r g b
+                , Font.color <| Element.rgb255 228 228 228
+                , Font.medium
+                , Font.center
+                , mouseDown
+                    [ Background.color <| Element.rgb255 180 180 179
+                    , Border.color <| Element.rgb255 84 83 81
+                    ]
+                ]
+                { onPress = Just buttonEvent
+                , label = text buttonLabel
+                }
+    in
     { title = "Homepage"
     , body =
-        [ Element.layout []
-            (Element.text "Hello,  Universe !!")
+        [ Element.layout [ padding 40 ] <|
+            row []
+                [ column [ width fill ]
+                    [ row []
+                        [ Input.text
+                            [ Border.roundEach
+                                { topLeft = 12
+                                , topRight = 12
+                                , bottomLeft = 0
+                                , bottomRight = 0
+                                }
+                            , Border.color <| Element.rgb255 84 83 81
+                            , padding 40
+                            , Background.color <| Element.rgb255 82 82 81
+                            , Font.light
+                            , Font.alignRight
+                            , Font.color <| Element.rgb255 255 255 255
+                            ]
+                            { label = Input.labelHidden "Result output box"
+                            , onChange = DoNothing
+                            , placeholder = Nothing
+                            , text = renderNumberTypetoString model.displayedNumber
+                            }
+                        ]
+                    , row []
+                        [ column [] [ createButton "AC" 70 AllClearTextField 0 0 0 0 103 102 101 ]
+                        , column [] [ createButton "+/-" 70 (DoNothing "") 0 0 0 0 103 102 101 ]
+                        , column [] [ createButton "%" 70 DivideByHundred 0 0 0 0 103 102 101 ]
+                        , column [] [ createButton "÷" 80 DivideNumbers 0 0 0 0 242 163 60 ]
+                        ]
+                    , row []
+                        [ column [] [ createButton "7" 70 (InsertDigit 7) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "8" 70 (InsertDigit 8) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "9" 70 (InsertDigit 9) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "X" 80 MultiplyNumbers 0 0 0 0 242 163 60 ]
+                        ]
+                    , row []
+                        [ column [] [ createButton "4" 70 (InsertDigit 4) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "5" 70 (InsertDigit 5) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "6" 70 (InsertDigit 6) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "—" 80 SubtractNumbers 0 0 0 0 242 163 60 ]
+                        ]
+                    , row []
+                        [ column [] [ createButton "1" 70 (InsertDigit 1) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "2" 70 (InsertDigit 2) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "3" 70 (InsertDigit 3) 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "+" 80 AddNumbers 0 0 0 0 242 163 60 ]
+                        ]
+                    , row []
+                        [ column [] [ createButton "0" 140 (InsertDigit 0) 0 0 12 0 126 126 125 ]
+                        , column [] [ createButton "." 70 DecimalButtonPressed 0 0 0 0 126 126 125 ]
+                        , column [] [ createButton "=" 80 EqualsTo 0 0 0 12 242 163 60 ]
+                        ]
+                    , Element.row [ Font.semiBold, padding 20 ]
+                        [ Element.link []
+                            { url = "/"
+                            , label = Element.text "Goto Home"
+                            }
+                        ]
+                    ]
+                ]
         ]
     }

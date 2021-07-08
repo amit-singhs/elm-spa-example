@@ -17,7 +17,13 @@ view =
                 , Element.row [ semiBold ]
                     [ Element.link []
                         { url = "/calculator"
-                        , label = Element.text "Click here for Calculator"
+                        , label = Element.text "Click here for Calculator page."
+                        }
+                    ]
+                , Element.row [ semiBold ]
+                    [ Element.link []
+                        { url = "/pointofsale"
+                        , label = Element.text "Click here for point of sale page."
                         }
                     ]
                 ]
