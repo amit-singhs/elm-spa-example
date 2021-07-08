@@ -22,7 +22,7 @@ view =
                     ]
                 , Element.row [ semiBold ]
                     [ Element.link []
-                        { url = "/pointofsale"
+                        { url = "/point-of-sale"
                         , label = Element.text "Click here for point of sale page."
                         }
                     ]
