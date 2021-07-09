@@ -354,7 +354,7 @@ view model =
                 , label = text buttonLabel
                 }
     in
-    { title = "Homepage"
+    { title = "Calculator"
     , body =
         [ Element.layout [ padding 40 ] <|
             row [ padding 20 ]
