@@ -9,7 +9,7 @@ import Element.Input as Input
 import Element.Region as Region
 import Heroicons.Solid as Heroicons
 import Svg.Attributes as SvgA
-import Utilities.Palette
+import Utilities.Palette as Palette
 
 
 type alias ModalConfig msg =

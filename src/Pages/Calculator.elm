@@ -357,7 +357,7 @@ view model =
     { title = "Homepage"
     , body =
         [ Element.layout [ padding 40 ] <|
-            row []
+            row [ padding 20 ]
                 [ column [ width fill ]
                     [ row []
                         [ Input.text
@@ -409,10 +409,16 @@ view model =
                         , column [] [ createButton "." 70 DecimalButtonPressed 0 0 0 0 126 126 125 ]
                         , column [] [ createButton "=" 80 EqualsTo 0 0 0 12 242 163 60 ]
                         ]
-                    , Element.row [ Font.semiBold, padding 20 ]
+                    , Element.row [ Font.semiBold, padding 10 ]
                         [ Element.link []
                             { url = "/"
                             , label = Element.text "Goto Home"
+                            }
+                        ]
+                    , Element.row [ Font.semiBold, padding 5 ]
+                        [ Element.link []
+                            { url = "/point-of-sale"
+                            , label = Element.text "Click here to go to point of sale page."
                             }
                         ]
                     ]
