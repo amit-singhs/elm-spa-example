@@ -1,9 +1,8 @@
-import { Elm } from './src/PortsPos.elm'
-
+// const { Elm } = require('./src/Pages/PointOfSale.elm')
 const BCHJS = require("@psf/bch-js")
 let bchjs = new BCHJS() // Defaults to BCHN network.
 
-var app = Elm.PortsPos.init({
+var app = Elm.Main.init({
     node: document.getElementById("elm-node")
 });
 app.ports.getCashAddress.subscribe(mnemonic => {

@@ -1,19 +1,16 @@
 module Pages.Calculator exposing (Model, Msg, page)
 
-import Browser
 import Debug exposing (toString)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events as Events
 import Element.Font as Font
 import Element.Input as Input
-import Html exposing (Html, button, del, div, input, p)
 import List exposing (..)
 import Page exposing (Page)
 import Request exposing (Request)
 import Shared
-import String
+import Utilities.Calculator as Calculator exposing (NumberType(..))
 import View exposing (View)
 
 
@@ -24,13 +21,9 @@ type Operation
     | Division
 
 
-type NumberType
-    = Integer Int
-    | Decimal Int Int
-
-
 type alias Model =
-    { firstNumber : NumberType
+    { shared : Shared.Model
+    , firstNumber : NumberType
     , secondNumber : NumberType
     , displayedNumber : NumberType
     , operationType : Maybe Operation
@@ -39,9 +32,10 @@ type alias Model =
     }
 
 
-init : Model
-init =
-    { firstNumber = Integer 0
+init : Shared.Model -> Model
+init shared =
+    { shared = shared
+    , firstNumber = Integer 0
     , secondNumber = Integer 0
     , displayedNumber = Integer 0
     , operationType = Nothing
@@ -67,58 +61,10 @@ type Msg
 -- UTILITIES FUNCTIONS
 
 
-removeDecimal : Float -> Int
-removeDecimal floatNumber =
-    if (floatNumber - toFloat (floor floatNumber)) /= 0 then
-        removeDecimal (10 * floatNumber)
-
-    else
-        round floatNumber
-
-
-renderNumberTypetoFloat : NumberType -> Float
-renderNumberTypetoFloat numType =
-    case numType of
-        Integer i ->
-            toFloat i
-
-        Decimal intNumber decimalPlaces ->
-            toFloat intNumber / toFloat (10 ^ decimalPlaces)
-
-
-renderFloatToNumberType : Float -> NumberType
-renderFloatToNumberType floatNumber =
-    if String.contains "." (String.fromFloat floatNumber) == False then
-        Integer (ceiling floatNumber)
-
-    else
-        case List.head (List.reverse (String.split "." (String.fromFloat floatNumber))) of
-            Just decimalPart ->
-                Decimal (removeDecimal floatNumber) (String.length decimalPart)
-
-            Nothing ->
-                Decimal 0 0
-
-
-renderNumberTypetoString : NumberType -> String
-renderNumberTypetoString numType =
-    case numType of
-        Integer i ->
-            String.fromInt i
-
-        Decimal intNumber decimalPlace ->
-            String.fromFloat (toFloat intNumber / toFloat (10 ^ decimalPlace))
-
-
-appendPeriodToInt : Int -> String
-appendPeriodToInt integerToBeAppended =
-    String.fromFloat (toFloat integerToBeAppended) ++ "."
-
-
 page : Shared.Model -> Request -> Page.With Model Msg
-page _ _ =
+page shared _ =
     Page.sandbox
-        { init = init
+        { init = init shared
         , update = update
         , view = view
         }
@@ -185,17 +131,17 @@ update msg model =
                     }
 
         AllClearTextField ->
-            init
+            init model.shared
 
         DivideByHundred ->
             { model
                 | displayedNumber =
                     case model.displayedNumber of
                         Integer x ->
-                            renderFloatToNumberType (toFloat x / 100)
+                            Calculator.renderFloatToNumberType (toFloat x / 100)
 
                         Decimal x y ->
-                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal x y) / 100)
+                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal x y) / 100)
             }
 
         EqualsTo ->
@@ -211,15 +157,15 @@ update msg model =
                                             Integer (a + b)
 
                                         Decimal c d ->
-                                            renderFloatToNumberType (toFloat a + renderNumberTypetoFloat (Decimal c d))
+                                            Calculator.renderFloatToNumberType (toFloat a + Calculator.renderNumberTypetoFloat (Decimal c d))
 
                                 Decimal e f ->
                                     case m.secondNumber of
                                         Integer g ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) + toFloat g)
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) + toFloat g)
 
                                         Decimal h i ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) + renderNumberTypetoFloat (Decimal h i))
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) + Calculator.renderNumberTypetoFloat (Decimal h i))
 
                         --Integer 1
                         Just Subtraction ->
@@ -230,15 +176,15 @@ update msg model =
                                             Integer (a - b)
 
                                         Decimal c d ->
-                                            renderFloatToNumberType (toFloat a - renderNumberTypetoFloat (Decimal c d))
+                                            Calculator.renderFloatToNumberType (toFloat a - Calculator.renderNumberTypetoFloat (Decimal c d))
 
                                 Decimal e f ->
                                     case m.secondNumber of
                                         Integer g ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) - toFloat g)
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) - toFloat g)
 
                                         Decimal h i ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) - renderNumberTypetoFloat (Decimal h i))
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) - Calculator.renderNumberTypetoFloat (Decimal h i))
 
                         Just Multiplication ->
                             case m.firstNumber of
@@ -248,15 +194,15 @@ update msg model =
                                             Integer (a * b)
 
                                         Decimal c d ->
-                                            renderFloatToNumberType (toFloat a * renderNumberTypetoFloat (Decimal c d))
+                                            Calculator.renderFloatToNumberType (toFloat a * Calculator.renderNumberTypetoFloat (Decimal c d))
 
                                 Decimal e f ->
                                     case m.secondNumber of
                                         Integer g ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) * toFloat g)
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) * toFloat g)
 
                                         Decimal h i ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) * renderNumberTypetoFloat (Decimal h i))
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) * Calculator.renderNumberTypetoFloat (Decimal h i))
 
                         Just Division ->
                             --m.firstNumber + m.secondNumber
@@ -267,15 +213,15 @@ update msg model =
                                             Integer (a // b)
 
                                         Decimal c d ->
-                                            renderFloatToNumberType (toFloat a / renderNumberTypetoFloat (Decimal c d))
+                                            Calculator.renderFloatToNumberType (toFloat a / Calculator.renderNumberTypetoFloat (Decimal c d))
 
                                 Decimal e f ->
                                     case m.secondNumber of
                                         Integer g ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) / toFloat g)
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) / toFloat g)
 
                                         Decimal h i ->
-                                            renderFloatToNumberType (renderNumberTypetoFloat (Decimal e f) / renderNumberTypetoFloat (Decimal h i))
+                                            Calculator.renderFloatToNumberType (Calculator.renderNumberTypetoFloat (Decimal e f) / Calculator.renderNumberTypetoFloat (Decimal h i))
 
                         --m.firstNumber - m.secondNumber
                         --Integer 3
@@ -324,36 +270,6 @@ update msg model =
 
 
 view model =
-    let
-        createButton buttonLabel buttonlength buttonEvent tL tR bL bR r g b =
-            Input.button
-                [ height (px 60)
-                , width (px buttonlength)
-                , Border.width 1
-                , Border.roundEach
-                    { topLeft = tL
-                    , topRight = tR
-                    , bottomLeft = bL
-                    , bottomRight = bR
-                    }
-                , Border.color <| Element.rgb255 84 83 81
-                , Font.size 25
-                , Font.family
-                    [ Font.typeface "Helvetica"
-                    ]
-                , Background.color <| Element.rgb255 r g b
-                , Font.color <| Element.rgb255 228 228 228
-                , Font.medium
-                , Font.center
-                , mouseDown
-                    [ Background.color <| Element.rgb255 180 180 179
-                    , Border.color <| Element.rgb255 84 83 81
-                    ]
-                ]
-                { onPress = Just buttonEvent
-                , label = text buttonLabel
-                }
-    in
     { title = "Calculator"
     , body =
         [ Element.layout [ padding 40 ] <|
@@ -377,37 +293,37 @@ view model =
                             { label = Input.labelHidden "Result output box"
                             , onChange = DoNothing
                             , placeholder = Nothing
-                            , text = renderNumberTypetoString model.displayedNumber
+                            , text = Calculator.renderNumberTypetoString model.displayedNumber
                             }
                         ]
                     , row []
-                        [ column [] [ createButton "AC" 70 AllClearTextField 0 0 0 0 103 102 101 ]
-                        , column [] [ createButton "+/-" 70 (DoNothing "") 0 0 0 0 103 102 101 ]
-                        , column [] [ createButton "%" 70 DivideByHundred 0 0 0 0 103 102 101 ]
-                        , column [] [ createButton "÷" 80 DivideNumbers 0 0 0 0 242 163 60 ]
+                        [ column [] [ Calculator.createButton "AC" 70 AllClearTextField 0 0 0 0 103 102 101 ]
+                        , column [] [ Calculator.createButton "+/-" 70 (DoNothing "") 0 0 0 0 103 102 101 ]
+                        , column [] [ Calculator.createButton "%" 70 DivideByHundred 0 0 0 0 103 102 101 ]
+                        , column [] [ Calculator.createButton "÷" 80 DivideNumbers 0 0 0 0 242 163 60 ]
                         ]
                     , row []
-                        [ column [] [ createButton "7" 70 (InsertDigit 7) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "8" 70 (InsertDigit 8) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "9" 70 (InsertDigit 9) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "X" 80 MultiplyNumbers 0 0 0 0 242 163 60 ]
+                        [ column [] [ Calculator.createButton "7" 70 (InsertDigit 7) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "8" 70 (InsertDigit 8) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "9" 70 (InsertDigit 9) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "X" 80 MultiplyNumbers 0 0 0 0 242 163 60 ]
                         ]
                     , row []
-                        [ column [] [ createButton "4" 70 (InsertDigit 4) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "5" 70 (InsertDigit 5) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "6" 70 (InsertDigit 6) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "—" 80 SubtractNumbers 0 0 0 0 242 163 60 ]
+                        [ column [] [ Calculator.createButton "4" 70 (InsertDigit 4) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "5" 70 (InsertDigit 5) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "6" 70 (InsertDigit 6) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "—" 80 SubtractNumbers 0 0 0 0 242 163 60 ]
                         ]
                     , row []
-                        [ column [] [ createButton "1" 70 (InsertDigit 1) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "2" 70 (InsertDigit 2) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "3" 70 (InsertDigit 3) 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "+" 80 AddNumbers 0 0 0 0 242 163 60 ]
+                        [ column [] [ Calculator.createButton "1" 70 (InsertDigit 1) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "2" 70 (InsertDigit 2) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "3" 70 (InsertDigit 3) 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "+" 80 AddNumbers 0 0 0 0 242 163 60 ]
                         ]
                     , row []
-                        [ column [] [ createButton "0" 140 (InsertDigit 0) 0 0 12 0 126 126 125 ]
-                        , column [] [ createButton "." 70 DecimalButtonPressed 0 0 0 0 126 126 125 ]
-                        , column [] [ createButton "=" 80 EqualsTo 0 0 0 12 242 163 60 ]
+                        [ column [] [ Calculator.createButton "0" 140 (InsertDigit 0) 0 0 12 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "." 70 DecimalButtonPressed 0 0 0 0 126 126 125 ]
+                        , column [] [ Calculator.createButton "=" 80 EqualsTo 0 0 0 12 242 163 60 ]
                         ]
                     , Element.row [ Font.semiBold, padding 10 ]
                         [ Element.link []
